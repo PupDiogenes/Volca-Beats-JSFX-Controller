@@ -1,0 +1,375 @@
+desc:MIDI Volca Beats Controller 009
+tags: MIDI processing routing
+
+//pan law code from Justin Frankel https:www.askjf.com/index.php?q=2342s
+               
+
+slider1:0.0<-6.0,6.0,0.1>Pan Law (dB)
+
+slider3:0<0,127,1>Stutter Time
+slider4:0<-64,64,1>Divergence
+slider5:0<0,127,1>Stutter Depth
+slider6:0<-64,64,1>Divergence
+
+slider8:64<0,127,1>Kick Level
+slider9:0<-1,1,0.013>Kick Pan
+
+slider11:64<0,127,1>Snare Level
+slider12:0<-1,1,0.013>Snare Pan
+
+slider15:64<0,127,1>Lo Tom Level
+slider16:0<-1,1,0.013>Lo Tom Pan
+slider20:64<0,127,1>Hi Tom Level
+slider21:0<-1,1,0.013>Hi Tom Pan
+slider22:64<0,127,1>Decay
+slider23:0<-64,64,1>Divergence
+
+slider25:64<0,127,1>Closed Hat Level
+slider26:0<-1,1,0.013>Closed Hat Pan
+slider27:64<0,127,1>Decay
+slider28:0<-64,64,1>Divergence
+
+slider30:64<0,127,1>Open Hat Level
+slider31:0<-1,1,0.013>Open Hat Pan
+slider32:64<0,127,1>Decay
+slider33:0<-64,64,1>Divergence
+
+slider37:64<0,127,1>Hat Grain
+slider38:0<-64,64,1>Divergence
+
+slider42:64<0,127,1>Clap Level
+slider43:0<-1,1,0.013>Clap Pan
+slider44:64<0,127,1>PCM Speed
+slider45:0<-64,64,1>Divergence
+
+slider50:64<0,127,1>Clave Level
+slider51:0<-1,1,0.013>Clave Pan
+slider52:64<0,127,1>PCM Speed
+slider53:0<-64,64,1>Divergence
+
+slider65:64<0,127,1>Agogo Level
+slider66:0<-1,1,0.013>Agogo Pan
+slider67:64<0,127,1>PCM Speed
+slider68:0<-64,64,1>Divergence
+
+slider80:64<0,127,1>Crash Level
+slider81:0<-1,1,0.013>Crash Pan
+slider82:64<0,127,1>Crash PCM Speed
+slider83:0<-64,64,1>Divergence
+
+in_pin:none
+out_pin:none
+
+@init
+
+PI = 3.14159265359 ;
+law = 10^(slider1 / 20);
+y=2;
+
+var1 = 0;
+var3 = 0;
+var4 = 0;
+var5 = 0;
+var6 = 0;
+var8 = 0;
+var9 = 0;
+var11 = 0;
+var12 = 0;
+var15 = 0;
+var16 = 0;
+var20 = 0;
+var21 = 0;
+var22 = 0;
+var23 = 0;
+var25 = 0;
+var26 = 0;
+var27 = 0;
+var28 = 0;
+var30 = 0;
+var31 = 0;
+var32 = 0;
+var33 = 0;
+var34 = 0;
+var42 = 0;
+var43 = 0;
+var44 = 0;
+var45 = 0;
+var50 = 0;
+var51 = 0;
+var52 = 0;
+var53 = 0;
+var65 = 0;
+var66 = 0;
+var67 = 0;
+var68 = 0;
+var80 = 0;
+var81 = 0;
+var82 = 0;
+var83 = 0;
+
+
+function stuttertime()
+ (
+  midisend($x00,$xb0,$x36,slider3+slider4);
+  midisend($x00,$xb1,$x36,slider3-slider4);
+ );
+ 
+function stutterdepth()
+ (
+  midisend($x00,$xb0,$x37,slider5+slider6);
+  midisend($x00,$xb1,$x37,slider5-slider6);
+ );
+ 
+function tomdecay()
+ (
+  midisend($x00,$xb0,$x38,slider22+slider23);
+  midisend($x00,$xb1,$x38,slider22-slider23);
+ );
+ 
+function clhatdecay()
+ (
+  midisend($x00,$xb0,$x39,slider27+slider28);
+  midisend($x00,$xb1,$x39,slider27-slider28);
+ );
+ 
+function ophatdecay()
+ (
+  midisend($x00,$xb0,$x3a,slider32+slider33);
+  midisend($x00,$xb1,$x3a,slider32-slider33);
+ );
+ 
+function hatgrain()
+ (
+  midisend($x00,$xb0,$x3b,slider37+slider38);
+  midisend($x00,$xb1,$x3b,slider37-slider38);
+ );
+ 
+function clapspeed()
+ (
+  midisend($x00,$xb0,$x32,slider44+slider45);
+  midisend($x00,$xb1,$x32,slider44-slider45);
+ );
+ 
+function clavespeed()
+ (
+  midisend($x00,$xb0,$x33,slider52+slider53);
+  midisend($x00,$xb1,$x33,slider52-slider53);
+ );
+ 
+function agogospeed()
+ (
+  midisend($x00,$xb0,$x34,slider67+slider68);
+  midisend($x00,$xb1,$x34,slider67-slider68);
+ );
+ 
+function crashspeed()
+ (
+  midisend($x00,$xb0,$x35,slider82+slider83);
+  midisend($x00,$xb1,$x35,slider82-slider83);
+ );
+ 
+ 
+ 
+ 
+
+function kick()
+ (
+  kickpan=slider9;
+  kickgain=law*sqrt(2)* (1.0 + (sqrt(2) * 0.5 / law - 1)/(sqrt(2)-1) * (1/cos(kickpan*0.25*PI)-1.0));
+  kickleftscale = cos((kickpan+1.0)*0.25*PI)*kickgain;
+  kickrightscale = sin((kickpan+1.0)*0.25*PI)*kickgain;
+  kickvolleft=slider8*kickleftscale;
+  kickvolright=slider8*kickrightscale;
+  midisend($x00,$xb0,$x28,kickvolleft);
+  midisend($x00,$xb1,$x28,kickvolright);
+ );
+
+function snare()
+ (
+  snarepan=slider12;
+snaregain=law*sqrt(2)* (1.0 + (sqrt(2) * 0.5 / law - 1)/(sqrt(2)-1) * (1/cos(snarepan*0.25*PI)-1.0));
+snareleftscale = cos((snarepan+1.0)*0.25*PI)*snaregain;
+snarerightscale = sin((snarepan+1.0)*0.25*PI)*snaregain;
+snarevolleft=slider11*snareleftscale;
+snarevolright=slider11*snarerightscale;
+  midisend($x00,$xb0,$x29,snarevolleft);
+  midisend($x00,$xb1,$x29,snarevolright);
+ );
+ 
+function lotom()
+ (
+lotompan=slider16;
+lotomgain=law*sqrt(2)* (1.0 + (sqrt(2) * 0.5 / law - 1)/(sqrt(2)-1) * (1/cos(lotompan*0.25*PI)-1.0));
+lotomleftscale = cos((lotompan+1.0)*0.25*PI)*lotomgain;
+lotomrightscale = sin((lotompan+1.0)*0.25*PI)*lotomgain;
+lotomvolleft=slider15*lotomleftscale;
+lotomvolright=slider15*lotomrightscale;
+  midisend($x00,$xb0,$x2a,lotomvolleft);
+  midisend($x00,$xb1,$x2a,lotomvolright);
+ );
+
+function hitom()
+ (
+  hitompan=slider21;
+  hitomgain=law*sqrt(2)* (1.0 + (sqrt(2) * 0.5 / law - 1)/(sqrt(2)-1) * (1/cos(hitompan*0.25*PI)-1.0));
+hitomleftscale = cos((hitompan+1.0)*0.25*PI)*hitomgain;
+hitomrightscale = sin((hitompan+1.0)*0.25*PI)*hitomgain;
+hitomvolleft=slider20*hitomleftscale;
+hitomvolright=slider20*hitomrightscale;
+  midisend($x00,$xb0,$x2b,hitomvolleft);
+  midisend($x00,$xb1,$x2b,hitomvolright);
+ );
+ 
+function clhat()
+ (
+clhatpan=slider26;
+clhatgain=law*sqrt(2)* (1.0 + (sqrt(2) * 0.5 / law - 1)/(sqrt(2)-1) * (1/cos(clhatpan*0.25*PI)-1.0));
+clhatleftscale = cos((clhatpan+1.0)*0.25*PI)*clhatgain;
+clhatrightscale = sin((clhatpan+1.0)*0.25*PI)*clhatgain;
+clhatvolleft=slider25*clhatleftscale;
+clhatvolright=slider25*clhatrightscale;
+  midisend($x00,$xb0,$x2c,clhatvolleft);
+  midisend($x00,$xb1,$x2c,clhatvolright);
+ );
+
+function ophat()
+ (
+ophatpan=slider31;
+ophatgain=law*sqrt(2)* (1.0 + (sqrt(2) * 0.5 / law - 1)/(sqrt(2)-1) * (1/cos(ophatpan*0.25*PI)-1.0));
+ophatleftscale = cos((ophatpan+1.0)*0.25*PI)*ophatgain;
+ophatrightscale = sin((ophatpan+1.0)*0.25*PI)*ophatgain;
+ophatvolleft=slider30*ophatleftscale;
+ophatvolright=slider30*ophatrightscale;
+  midisend($x00,$xb0,$x2d,ophatvolleft);
+  midisend($x00,$xb1,$x2d,ophatvolright);
+ );
+ 
+function clap()
+ (
+clappan=slider43;
+clapgain=law*sqrt(2)* (1.0 + (sqrt(2) * 0.5 / law - 1)/(sqrt(2)-1) * (1/cos(clappan*0.25*PI)-1.0));
+clapleftscale = cos((clappan+1.0)*0.25*PI)*clapgain;
+claprightscale = sin((clappan+1.0)*0.25*PI)*clapgain;
+clapvolleft=slider42*clapleftscale;
+clapvolright=slider42*claprightscale;
+  midisend($x00,$xb0,$x2e,clapvolleft);
+  midisend($x00,$xb1,$x2e,clapvolright);
+ );
+
+function clave()
+ (
+clavepan=slider51;
+clavegain=law*sqrt(2)* (1.0 + (sqrt(2) * 0.5 / law - 1)/(sqrt(2)-1) * (1/cos(clavepan*0.25*PI)-1.0));
+claveleftscale = cos((clavepan+1.0)*0.25*PI)*clavegain;
+claverightscale = sin((clavepan+1.0)*0.25*PI)*clavegain;
+clavevolleft=slider50*claveleftscale;
+clavevolright=slider50*claverightscale;
+  midisend($x00,$xb0,$x2f,clavevolleft);
+  midisend($x00,$xb1,$x2f,clavevolright);
+ );
+ 
+function agogo()
+ (
+agogopan=slider66;
+agogogain=law*sqrt(2)* (1.0 + (sqrt(2) * 0.5 / law - 1)/(sqrt(2)-1) * (1/cos(agogopan*0.25*PI)-1.0));
+agogoleftscale = cos((agogopan+1.0)*0.25*PI)*agogogain;
+agogorightscale = sin((agogopan+1.0)*0.25*PI)*agogogain;
+agogovolleft=slider65*agogoleftscale;
+agogovolright=slider65*agogorightscale;
+  midisend($x00,$xb0,$x30,agogovolleft);
+  midisend($x00,$xb1,$x30,agogovolright);
+ );
+
+function crash()
+ (
+crashpan=slider81;
+crashgain=law*sqrt(2)* (1.0 + (sqrt(2) * 0.5 / law - 1)/(sqrt(2)-1) * (1/cos(crashpan*0.25*PI)-1.0));
+crashleftscale = cos((crashpan+1.0)*0.25*PI)*crashgain;
+crashrightscale = sin((crashpan+1.0)*0.25*PI)*crashgain;
+crashvolleft=slider80*crashleftscale;
+crashvolrights=slider80*crashrightscale;
+  midisend($x00,$xb0,$x31,crashvolleft);
+  midisend($x00,$xb1,$x31,crashvolright);
+ );
+ 
+function lawchange()
+ (
+  kick();
+  snare();
+  lotom();
+  hitom();
+  clhat();
+  ophat();
+  clap();
+  clave();
+  agogo();
+  crash();
+ ); 
+ 
+function go()
+
+(
+ var1 == slider1 ? x=1 : (var1 = slider1; lawchange(););
+
+ var3 == slider3 ? x=1 : (var3 = slider3; stuttertime(););
+ var4 == slider4 ? x=1 : (var4 = slider4; stuttertime(););
+ 
+ var5 == slider5 ? x=1 : (var5 = slider5; stutterdepth(););
+ var6 == slider6 ? x=1 : (var6 = slider6; stutterdepth(););
+ 
+ var8 == slider8 ? x=1 : (var8 = slider8; kick(););
+ var9 == slider9 ? x=1 : (var9 = slider9; kick();); 
+ 
+ var11 == slider11 ? x=1 : (var11 = slider11; snare();); 
+ var12 == slider12 ? x=1 : (var12 = slider12; snare();); 
+ 
+ var15 == slider15 ? x=1 : (var15 = slider15; lotom();); 
+ var16 == slider16 ? x=1 : (var16 = slider16; lotom();); 
+ var20 == slider20 ? x=1 : (var20 = slider20; hitom();); 
+ var21 == slider21 ? x=1 : (var21 = slider21; hitom();); 
+ var22 == slider22 ? x=1 : (var22 = slider22; tomdecay();); 
+ var23 == slider23 ? x=1 : (var23 = slider23; tomdecay();); 
+ 
+ var25 == slider25 ? x=1 : (var25 = slider25; clhat();); 
+ var26 == slider26 ? x=1 : (var26 = slider26; clhat();); 
+ var27 == slider27 ? x=1 : (var27 = slider27; clhatdecay();); 
+ var28 == slider28 ? x=1 : (var28 = slider28; clhatdecay(););
+  
+ var30 == slider30 ? x=1 : (var30 = slider30; ophat();); 
+ var31 == slider31 ? x=1 : (var31 = slider31; ophat(););
+ var32 == slider32 ? x=1 : (var32 = slider32; ophatdecay();); 
+ var33 == slider33 ? x=1 : (var33 = slider33; ophatdecay();); 
+ 
+ var37 == slider37 ? x=1 : (var37 = slider37; hatgrain();); 
+ var38 == slider38 ? x=1 : (var38 = slider38; hatgrain();); 
+ 
+ var42 == slider42 ? x=1 : (var42 = slider42; clap();); 
+ var43 == slider43 ? x=1 : (var43 = slider43; clap();); 
+ var44 == slider44 ? x=1 : (var44 = slider44; clapspeed();); 
+ var45 == slider45 ? x=1 : (var45 = slider45; clapspeed();); 
+  
+ var50 == slider50 ? x=1 : (var50 = slider50; clave();); 
+ var51 == slider51 ? x=1 : (var51 = slider51; clave();); 
+ var52 == slider52 ? x=1 : (var52 = slider52; clavespeed();); 
+ var53 == slider53 ? x=1 : (var53 = slider53; clavespeed();); 
+ 
+ var65 == slider65 ? x=1 : (var65 = slider65; agogo();); 
+ var66 == slider66 ? x=1 : (var66 = slider66; agogo();); 
+ var67 == slider67 ? x=1 : (var67 = slider67; agogospeed();); 
+ var68 == slider68 ? x=1 : (var68 = slider68; agogospeed();); 
+ 
+ var80 == slider80 ? x=1 : (var80 = slider80; crash();); 
+ var81 == slider81 ? x=1 : (var81 = slider81; crash();); 
+ var82 == slider82 ? x=1 : (var82 = slider82; crashspeed();); 
+ var83 == slider83 ? x=1 : (var83 = slider83; crashspeed();); 
+ 
+ );
+
+
+@block
+
+law = 10^(slider1 / 20);
+
+y == 1 ? (go(); y+=1;) : y+=1;
+y == 4 ? y=1;
+
